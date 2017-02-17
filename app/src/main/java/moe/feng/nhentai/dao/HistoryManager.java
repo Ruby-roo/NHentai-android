@@ -1,10 +1,13 @@
 package moe.feng.nhentai.dao;
 
 import android.content.Context;
+
 import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import moe.feng.nhentai.model.Book;
 import moe.feng.nhentai.util.Utility;
@@ -83,8 +86,10 @@ public class HistoryManager {
         return books.size();
     }
 
-    public ArrayList<Book> toArray() {
-        return books.data;
+    public List<Book> toList() {
+        List<Book> reverse = new ArrayList<>(books.data);
+        Collections.reverse(reverse);
+        return reverse;
     }
 
     public int find(Book book) {
@@ -123,7 +128,7 @@ public class HistoryManager {
 
     private class MyArray {
 
-        public ArrayList<Book> data = new ArrayList<>();
+        public List<Book> data = new ArrayList<>();
 
         public String toJSONString() {
             return new Gson().toJson(this);

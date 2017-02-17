@@ -1,17 +1,14 @@
 package moe.feng.nhentai.dao;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
-import moe.feng.nhentai.cache.file.FileCacheManager;
-import moe.feng.nhentai.model.BaseMessage;
 import moe.feng.nhentai.model.Book;
-import moe.feng.nhentai.util.AsyncTask;
 import moe.feng.nhentai.util.Utility;
 
 public class FavoritesManager {
@@ -83,7 +80,7 @@ public class FavoritesManager {
 		return books.size();
 	}
 
-	public ArrayList<Book> toArray() {
+	public List<Book> toList() {
 		return books.data;
 	}
 
