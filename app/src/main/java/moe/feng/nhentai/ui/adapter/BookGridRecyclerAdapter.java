@@ -8,12 +8,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.lid.lib.LabelView;
+
 import java.util.ArrayList;
+import java.util.List;
 
 import moe.feng.nhentai.R;
 import moe.feng.nhentai.api.BookApi;
@@ -70,7 +71,7 @@ public class BookGridRecyclerAdapter extends AbsRecyclerViewAdapter {
 	public void onBindViewHolder(final ClickableViewHolder holder,final int position) {
 		super.onBindViewHolder(holder, position);
 		if (holder instanceof ViewHolder) {
-			ArrayList<Book> data = this.data == null ? fm.toArray() : this.data;
+			List<Book> data = this.data == null ? fm.toList() : this.data;
 			final ViewHolder mHolder = (ViewHolder) holder;
 			String text = "        "+ data.get(position).getAvailableTitle();
 			mHolder.mTitleTextView.setText(text);
@@ -111,7 +112,7 @@ public class BookGridRecyclerAdapter extends AbsRecyclerViewAdapter {
 
 	@Override
 	public int getItemCount() {
-		ArrayList<Book> data = this.data == null ? fm.toArray() : this.data;
+		List<Book> data = this.data == null ? fm.toList() : this.data;
 		return data.size();
 	}
 
