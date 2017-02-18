@@ -77,8 +77,6 @@ public class BookPageFragment extends LazyFragment {
 				}
 			}
 		});
-
-		new DownloadTask().execute();
 	}
 
 	@Override
@@ -100,6 +98,13 @@ public class BookPageFragment extends LazyFragment {
 		}
 
 	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		new DownloadTask().execute();
+	}
+
 	private class DownloadTask extends AsyncTask<Void, Void, Bitmap> {
 
 		@Override
