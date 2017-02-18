@@ -124,7 +124,7 @@ public class BookListRecyclerAdapter extends AbsRecyclerViewAdapter {
             mHolder.mImagePlaceholder = drawable;
 
             if (previewImageUrl != null) {
-                new ImageDownloader(position).execute(mHolder.getParentView());
+                new ImageDownloader(getItem(position)).execute(mHolder.getParentView());
             }
 
             Book book = mData.get(position);
@@ -154,25 +154,24 @@ public class BookListRecyclerAdapter extends AbsRecyclerViewAdapter {
     }
 
     private class ImageDownloader extends AsyncTask<Object, Object, Void> {
-        private int mPosition;
+        private Book mBook;
 
-        public ImageDownloader(int position) {
-            mPosition = position;
+        ImageDownloader(Book book) {
+            mBook = book;
         }
 
         @Override
         protected Void doInBackground(Object[] params) {
             View v = (View) params[0];
             ViewHolder h = (ViewHolder) v.getTag();
-            Book book = getItem(mPosition);
 
-            if (!TextUtils.isEmpty(book.previewImageUrl)) {
+            if (!TextUtils.isEmpty(mBook.previewImageUrl)) {
                 ImageView imageView = h.mPreviewImageView;
                 boolean useHdImage = mSettings != null && mSettings.getBoolean(Settings.KEY_LIST_HD_IMAGE, false);
-                Bitmap img = useHdImage ? BookApi.getCover(getContext(), book) : BookApi.getThumb(getContext(), book);
+                Bitmap img = useHdImage ? BookApi.getCover(getContext(), mBook) : BookApi.getThumb(getContext(), mBook);
 
                 if (img != null) {
-                    publishProgress(v, img, imageView, book);
+                    publishProgress(v, img, imageView, mBook);
                 }
             }
 
@@ -186,8 +185,8 @@ public class BookListRecyclerAdapter extends AbsRecyclerViewAdapter {
             View v = (View) values[0];
             Bitmap img = (Bitmap) values[1];
             ImageView imageView = (ImageView) values[2];
-            if (!(v.getTag() instanceof ViewHolder) || getItem(mPosition) != null &&
-                    getItem(mPosition).bookId.equals(((Book) values[3]).bookId)) {
+            if (!(v.getTag() instanceof ViewHolder) || mBook != null &&
+                    !mBook.bookId.equals(((Book) values[3]).bookId)) {
                 return;
             }
 
