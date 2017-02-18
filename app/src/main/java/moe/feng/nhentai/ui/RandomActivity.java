@@ -11,7 +11,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.view.ViewCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -19,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+
 import java.util.Random;
 
 import moe.feng.nhentai.R;
@@ -90,7 +90,7 @@ public class RandomActivity extends AbsActivity {
 			@Override
 			public void onClick(View v) {
 				if (book != null) {
-					BookDetailsActivity.launch(RandomActivity.this, mCoverView, book, 0);
+					BookDetailsActivity.launch(getBaseContext(), book, 0);
 				} else {
 					Snackbar.make(
 							getWindow().getDecorView().getRootView(),

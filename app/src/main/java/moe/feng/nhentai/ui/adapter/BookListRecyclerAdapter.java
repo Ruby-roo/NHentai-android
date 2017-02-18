@@ -8,11 +8,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.lid.lib.LabelView;
+
 import java.util.ArrayList;
 
 import moe.feng.nhentai.R;
@@ -95,6 +95,7 @@ public class BookListRecyclerAdapter extends AbsRecyclerViewAdapter {
 	@Override
 	public void onBindViewHolder(final ClickableViewHolder holder, final int position) {
 		super.onBindViewHolder(holder, position);
+		Book book = data.get(position);
 		if (holder instanceof ViewHolder) {
 			final ViewHolder mHolder = (ViewHolder) holder;
 			String text = "        " + data.get(position).getAvailableTitle();
@@ -120,13 +121,11 @@ public class BookListRecyclerAdapter extends AbsRecyclerViewAdapter {
 			mHolder.mImagePlaceholder = drawable;
 
 			if (previewImageUrl != null) {
-				new ImageDownloader().execute(mHolder.getParentView());
+				new ImageDownloader(getItem(position)).execute(mHolder.getParentView());
 			}
 
-			mHolder.book = data.get(position);
-
-			if (FavoritesManager.getInstance(getContext()).contains(mHolder.book.bookId)) {
-				Log.i(TAG, "Find favorite: " + mHolder.book.bookId);
+			if (FavoritesManager.getInstance(getContext()).contains(book.bookId)) {
+				Log.i(TAG, "Find favorite: " + book.bookId);
 				mHolder.labelView.setText(R.string.label_added_to_favorite);
 				mHolder.labelView.setBackgroundResource(R.color.blue_500);
 				mHolder.labelView.setTargetView(mHolder.mPreviewImageView, 10, LabelView.Gravity.RIGHT_TOP);
@@ -138,26 +137,34 @@ public class BookListRecyclerAdapter extends AbsRecyclerViewAdapter {
 		return Long.valueOf(data.get(position).galleryId);
 	}
 
+	public Book getItem(int position) {
+		return data.get(position);
+	}
+
 	@Override
 	public int getItemCount() {
 		return data.size();
 	}
 
 	private class ImageDownloader extends AsyncTask<Object, Object, Void> {
+		private Book mBook;
+
+		 ImageDownloader(Book book) {
+			mBook = book;
+		}
 
 		@Override
 		protected Void doInBackground(Object[] params) {
 			View v = (View) params[0];
 			ViewHolder h = (ViewHolder) v.getTag();
-			Book book = h.book;
 
-			if (!TextUtils.isEmpty(book.previewImageUrl)) {
+			if (!TextUtils.isEmpty(mBook.previewImageUrl)) {
 				ImageView imageView = h.mPreviewImageView;
 				boolean useHdImage = sets != null && sets.getBoolean(Settings.KEY_LIST_HD_IMAGE, false);
-				Bitmap img = useHdImage ? BookApi.getCover(getContext(), book) : BookApi.getThumb(getContext(), book);
+				Bitmap img = useHdImage ? BookApi.getCover(getContext(), mBook) : BookApi.getThumb(getContext(), mBook);
 
 				if (img != null) {
-					publishProgress(v, img, imageView, book);
+					publishProgress(v, img, imageView, mBook);
 				}
 			}
 
@@ -171,8 +178,8 @@ public class BookListRecyclerAdapter extends AbsRecyclerViewAdapter {
 			View v = (View) values[0];
 			Bitmap img = (Bitmap) values[1];
 			ImageView imageView = (ImageView) values [2];
-			if (!(v.getTag() instanceof ViewHolder) || (((ViewHolder) v.getTag()).book != null &&
-					!((ViewHolder) v.getTag()).book.bookId.equals(((Book) values[3]).bookId))) {
+			if (!(v.getTag() instanceof ViewHolder) || mBook != null &&
+					!mBook.bookId.equals(((Book) values[3]).bookId)) {
 				return;
 			}
 
@@ -191,8 +198,6 @@ public class BookListRecyclerAdapter extends AbsRecyclerViewAdapter {
 		public TextView mTitleTextView;
 
 		Drawable mImagePlaceholder;
-
-		public Book book;
 
 		LabelView labelView;
 

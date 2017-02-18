@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import moe.feng.nhentai.R;
 import moe.feng.nhentai.cache.file.FileCacheManager;
 import moe.feng.nhentai.dao.FavoritesManager;
-import moe.feng.nhentai.dao.HistoryManager;
 import moe.feng.nhentai.model.Book;
 import moe.feng.nhentai.ui.BookDetailsActivity;
 import moe.feng.nhentai.ui.adapter.BookListRecyclerAdapter;
@@ -80,7 +79,7 @@ public class DownloadManagerFragment extends LazyFragment {
 		new BooksGetTask().execute();
 	}
 
-	private void setRecyclerViewAdapter(BookListRecyclerAdapter adapter) {
+	private void setRecyclerViewAdapter(final BookListRecyclerAdapter adapter) {
 
 		adapter.setOnItemClickListener(new AbsRecyclerViewAdapter.OnItemClickListener() {
 			@Override
@@ -88,7 +87,7 @@ public class DownloadManagerFragment extends LazyFragment {
 				BookListRecyclerAdapter.ViewHolder holder = (BookListRecyclerAdapter.ViewHolder) viewHolder;
 				Log.i(TAG, "You clicked position no." + position + " item, " +
 						"its name is " + holder.mTitleTextView.getText().toString());
-				BookDetailsActivity.launch(getActivity(), holder.mPreviewImageView, holder.book, position);
+				BookDetailsActivity.launch(getActivity(), adapter.getItem(position), position, true);
 			}
 		});
 		mRecyclerView.setAdapter(adapter);

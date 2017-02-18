@@ -87,12 +87,11 @@ public class HistoryFragment extends LazyFragment {
         return super.onOptionsItemSelected(item);
     }
 
-    private void setRecyclerViewAdapter(BookListRecyclerAdapter adapter) {
+    private void setRecyclerViewAdapter(final BookListRecyclerAdapter adapter) {
         adapter.setOnItemClickListener(new AbsRecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position, AbsRecyclerViewAdapter.ClickableViewHolder viewHolder) {
-                BookListRecyclerAdapter.ViewHolder holder = (BookListRecyclerAdapter.ViewHolder) viewHolder;
-                BookDetailsActivity.launch(getActivity(), holder.mPreviewImageView, holder.book, position);
+                BookDetailsActivity.launch(getActivity(), adapter.getItem(position), position);
             }
         });
         mRecyclerView.setAdapter(adapter);
