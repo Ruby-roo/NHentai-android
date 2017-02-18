@@ -29,7 +29,6 @@ import moe.feng.nhentai.util.TextDrawable;
 import moe.feng.nhentai.util.Utility;
 
 public class BookListRecyclerAdapter extends AbsRecyclerViewAdapter {
-
     private List<Book> mData;
     private Settings mSettings;
     private ColorGenerator mColorGenerator;
@@ -54,7 +53,11 @@ public class BookListRecyclerAdapter extends AbsRecyclerViewAdapter {
 
     public BookListRecyclerAdapter(RecyclerView recyclerView, ArrayList<Book> data, FavoritesManager fm, Settings sets) {
         super(recyclerView);
-        mData = data == null ? fm.toList() : data;
+        if (data == null) {
+            mData = fm.toList();
+        } else {
+            mData = data;
+        }
 
         mSettings = sets;
         mColorGenerator = ColorGenerator.MATERIAL;
@@ -63,12 +66,17 @@ public class BookListRecyclerAdapter extends AbsRecyclerViewAdapter {
 
     public BookListRecyclerAdapter(RecyclerView recyclerView, ArrayList<Book> data, HistoryManager hm, Settings sets) {
         super(recyclerView);
-        mData = data == null ? hm.toList() : data;
+        if (data == null) {
+            mData = hm.toList();
+        } else {
+            mData = data;
+        }
 
         mSettings = sets;
         mColorGenerator = ColorGenerator.MATERIAL;
         setHasStableIds(true);
     }
+
 
     @Override
     public void onViewRecycled(ClickableViewHolder holder) {
@@ -116,13 +124,13 @@ public class BookListRecyclerAdapter extends AbsRecyclerViewAdapter {
             mHolder.mImagePlaceholder = drawable;
 
             if (previewImageUrl != null) {
-                new ImageDownloader().execute(mHolder.getParentView());
+                new ImageDownloader(position).execute(mHolder.getParentView());
             }
 
-            mHolder.book = mData.get(position);
+            Book book = mData.get(position);
 
-            if (FavoritesManager.getInstance(getContext()).contains(mHolder.book.bookId)) {
-                Log.i(TAG, "Find favorite: " + mHolder.book.bookId);
+            if (FavoritesManager.getInstance(getContext()).contains(book.bookId)) {
+                Log.i(TAG, "Find favorite: " + book.bookId);
                 mHolder.labelView.setText(R.string.label_added_to_favorite);
                 mHolder.labelView.setBackgroundResource(R.color.blue_500);
                 mHolder.labelView.setTargetView(mHolder.mPreviewImageView, 10, LabelView.Gravity.RIGHT_TOP);
@@ -135,18 +143,28 @@ public class BookListRecyclerAdapter extends AbsRecyclerViewAdapter {
         return Long.valueOf(mData.get(position).galleryId);
     }
 
+    public Book getItem(int position) {
+        return mData.get(position);
+    }
+
+
     @Override
     public int getItemCount() {
         return mData.size();
     }
 
     private class ImageDownloader extends AsyncTask<Object, Object, Void> {
+        private int mPosition;
+
+        public ImageDownloader(int position) {
+            mPosition = position;
+        }
 
         @Override
         protected Void doInBackground(Object[] params) {
             View v = (View) params[0];
             ViewHolder h = (ViewHolder) v.getTag();
-            Book book = h.book;
+            Book book = getItem(mPosition);
 
             if (!TextUtils.isEmpty(book.previewImageUrl)) {
                 ImageView imageView = h.mPreviewImageView;
@@ -168,8 +186,8 @@ public class BookListRecyclerAdapter extends AbsRecyclerViewAdapter {
             View v = (View) values[0];
             Bitmap img = (Bitmap) values[1];
             ImageView imageView = (ImageView) values[2];
-            if (!(v.getTag() instanceof ViewHolder) || (((ViewHolder) v.getTag()).book != null &&
-                    !((ViewHolder) v.getTag()).book.bookId.equals(((Book) values[3]).bookId))) {
+            if (!(v.getTag() instanceof ViewHolder) || getItem(mPosition) != null &&
+                    getItem(mPosition).bookId.equals(((Book) values[3]).bookId)) {
                 return;
             }
 
@@ -187,8 +205,6 @@ public class BookListRecyclerAdapter extends AbsRecyclerViewAdapter {
 
         Drawable mImagePlaceholder;
 
-        public Book book;
-
         LabelView labelView;
 
         public ViewHolder(View itemView, LabelView labelView) {
@@ -201,7 +217,5 @@ public class BookListRecyclerAdapter extends AbsRecyclerViewAdapter {
 
             itemView.setTag(this);
         }
-
     }
-
 }

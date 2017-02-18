@@ -209,8 +209,7 @@ public class SearchActivity extends AbsActivity {
 		adapter.setOnItemClickListener(new AbsRecyclerViewAdapter.OnItemClickListener() {
 			@Override
 			public void onItemClick(int position, AbsRecyclerViewAdapter.ClickableViewHolder viewHolder) {
-				BookListRecyclerAdapter.ViewHolder holder = (BookListRecyclerAdapter.ViewHolder) viewHolder;
-				BookDetailsActivity.launch(SearchActivity.this, holder.mPreviewImageView, holder.book, position);
+				BookDetailsActivity.launch(getBaseContext(), adapter.getItem(position), position);
 			}
 		});
 		adapter.addOnScrollListener(new RecyclerView.OnScrollListener() {

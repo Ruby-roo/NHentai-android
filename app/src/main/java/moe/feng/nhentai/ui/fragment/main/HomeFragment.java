@@ -277,12 +277,11 @@ public class HomeFragment extends LazyFragment {
         return super.onOptionsItemSelected(item);
     }
 
-    private void setRecyclerAdapter(BookListRecyclerAdapter adapter) {
+    private void setRecyclerAdapter(final BookListRecyclerAdapter adapter) {
         adapter.setOnItemClickListener(new AbsRecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position, AbsRecyclerViewAdapter.ClickableViewHolder viewHolder) {
-                BookListRecyclerAdapter.ViewHolder holder = (BookListRecyclerAdapter.ViewHolder) viewHolder;
-                BookDetailsActivity.launch(getActivity(), holder.mPreviewImageView, holder.book, position);
+                BookDetailsActivity.launch(getActivity(), adapter.getItem(position), position);
             }
         });
         adapter.addOnScrollListener(new RecyclerView.OnScrollListener() {

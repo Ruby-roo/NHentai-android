@@ -9,7 +9,6 @@ import android.view.MenuItem;
 
 import moe.feng.nhentai.R;
 import moe.feng.nhentai.dao.FavoritesManager;
-import moe.feng.nhentai.dao.HistoryManager;
 import moe.feng.nhentai.ui.BookDetailsActivity;
 import moe.feng.nhentai.ui.adapter.BookListRecyclerAdapter;
 import moe.feng.nhentai.ui.common.AbsRecyclerViewAdapter;
@@ -80,12 +79,11 @@ public class FavoriteFragment extends LazyFragment {
 		return super.onOptionsItemSelected(item);
 	}
 
-	private void setRecyclerViewAdapter(BookListRecyclerAdapter adapter) {
+	private void setRecyclerViewAdapter(final BookListRecyclerAdapter adapter) {
 		adapter.setOnItemClickListener(new AbsRecyclerViewAdapter.OnItemClickListener() {
 			@Override
 			public void onItemClick(int position, AbsRecyclerViewAdapter.ClickableViewHolder viewHolder) {
-				BookListRecyclerAdapter.ViewHolder holder = (BookListRecyclerAdapter.ViewHolder) viewHolder;
-				BookDetailsActivity.launch(getActivity(), holder.mPreviewImageView, holder.book, position);
+				BookDetailsActivity.launch(getActivity(), adapter.getItem(position), position);
 			}
 		});
 		mRecyclerView.setAdapter(adapter);

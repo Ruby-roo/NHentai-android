@@ -1,7 +1,6 @@
 package moe.feng.nhentai.ui;
 
 import android.animation.Animator;
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.NotificationManager;
@@ -15,8 +14,8 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -79,6 +78,7 @@ public class BookDetailsActivity extends AbsActivity implements ObservableScroll
 	private RecyclerView mPreviewList, mRecommendList;
 	private ArrayList<Book> Recommend;
 	private boolean isPlayingFABAnimation = false;
+	private boolean mIsFromSaved = false;
 
 	private int APP_BAR_HEIGHT, TOOLBAR_HEIGHT, STATUS_BAR_HEIGHT = 0, minHeight = 0;
 
@@ -91,7 +91,7 @@ public class BookDetailsActivity extends AbsActivity implements ObservableScroll
 	private boolean isFavorite = false, originFavorite = false, isFromExternal = false;
 	private boolean isDownloaded = false;
 
-	private final static String EXTRA_BOOK_DATA = "book_data", EXTRA_POSITION = "item_position";
+	private final static String EXTRA_BOOK_DATA = "book_data", EXTRA_POSITION = "item_position", EXTRA_IS_SAVED = "is_saved";
 	private NotificationManager mNotifyManager;
 	private NotificationCompat.Builder mBuilder;
 	public final static int REQUEST_MAIN = 1001, RESULT_HAVE_FAV = 100;
@@ -127,6 +127,7 @@ public class BookDetailsActivity extends AbsActivity implements ObservableScroll
 		}
 
 		mFileCacheManager = FileCacheManager.getInstance(getApplicationContext());
+		mIsFromSaved = intent.getBooleanExtra(EXTRA_IS_SAVED, false);
 
 		isFavorite = originFavorite = FavoritesManager.getInstance(getApplicationContext()).contains(book.bookId);
 
@@ -212,17 +213,22 @@ public class BookDetailsActivity extends AbsActivity implements ObservableScroll
 		mImageContainer.setTranslationY(target * 0.7f);
 	}
 
-	public static void launch(Activity activity, ImageView imageView, Book book, int fromPosition) {
-		Intent intent = new Intent(activity, BookDetailsActivity.class);
+	public static void launch(Context context, Book book, int fromPosition) {
+		launch(context, book, fromPosition, false);
+	}
+
+	public static void launch(Context context, Book book, int fromPosition, boolean isFromSaved) {
+		Intent intent = new Intent(context, BookDetailsActivity.class);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
-				&& Settings.getInstance(activity).getBoolean(Settings.KEY_ALLOW_STANDALONE_TASK, true)) {
+				&& Settings.getInstance(context).getBoolean(Settings.KEY_ALLOW_STANDALONE_TASK, true)) {
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
 		} else {
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		}
 		intent.putExtra(EXTRA_BOOK_DATA, book.toJSONString());
 		intent.putExtra(EXTRA_POSITION, fromPosition);
-		activity.startActivity(intent);
+		intent.putExtra(EXTRA_IS_SAVED, isFromSaved);
+		context.startActivity(intent);
 	}
 
 	private void updateUIContent() {
@@ -308,7 +314,7 @@ public class BookDetailsActivity extends AbsActivity implements ObservableScroll
 		adapter1.setOnItemClickListener(new AbsRecyclerViewAdapter.OnItemClickListener() {
 			@Override
 			public void onItemClick(int position, AbsRecyclerViewAdapter.ClickableViewHolder holder) {
-				BookDetailsActivity.launch(BookDetailsActivity.this, null, Recommend.get(position), position);
+				BookDetailsActivity.launch(getBaseContext(), Recommend.get(position), position);
 			}
 		});
 		mRecommendList.setAdapter(adapter1);
@@ -652,8 +658,7 @@ public class BookDetailsActivity extends AbsActivity implements ObservableScroll
 		mProgressWheel.setVisibility(View.VISIBLE);
 		mProgressWheel.spin();
 
-		new BookGetTask().execute(book.bookId);
-
+		new BookGetTask(book, mIsFromSaved).execute();
 	}
 
 	private void onActionDownloadClick() {
@@ -973,16 +978,23 @@ public class BookDetailsActivity extends AbsActivity implements ObservableScroll
 	}
 
 	private class BookGetTask extends AsyncTask<String, Void, BaseMessage> {
+		private Book mBook;
+		private boolean mIsFromSaved;
+
+		BookGetTask(Book book, boolean isFromSaved) {
+			mBook = book;
+			mIsFromSaved = isFromSaved;
+		}
 
 		@Override
 		protected BaseMessage doInBackground(String... params) {
-				return BookApi.getBook(getApplicationContext(), book);
+			return BookApi.getBook(getApplicationContext(), mBook);
 		}
 
 		@Override
 		protected void onPostExecute(BaseMessage result) {
 			if (result.getCode() == 0) {
-				book = result.getData();
+				book = mIsFromSaved ? mBook : (Book) result.getData();
 				updateUIContent();
 			} else {
 				mProgressWheel.setVisibility(View.GONE);
